@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         id="WebApp_ID" version="2.5" metadata-complete="true">
+    <display-name>ssmbui</display-name>
+    
+    <!-- 欢迎页 -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>  
+    </welcome-file-list>
+    <!-- 配置 Spring 配置文件的名称和位置 -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:spring/applicationContext-config.xml</param-value>
+    </context-param>
+    <!-- 启动 IOC 容器的 ServletContextListener -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <!--log4j监听-->
+    <listener>
+        <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+    </listener>
+    <!-- 配置 Struts2 的 Filter -->
+    <filter>
+        <filter-name>struts2</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+        <!-- 编码 -->
+        <init-param>
+            <param-name>struts.i18n.encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts2</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!--清除缓存，帮我们进行清理在做上传文件的时候，要在web.xml中增加ActionContextCleanUp这个filter，如果不增加，会发生第一次上传取不到文件的情况。-->
+    <!--    <filter>
+        <filter-name>struts-cleanup</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ActionContextCleanUp</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts-cleanup</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+    <!--如果上面提示警告-->
+    <filter>
+        <filter-name>struts-prepare</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts-prepare</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+     
+    <filter>
+        <filter-name>struts-execute</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsExecuteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts-execute</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+<!--    el表达式使用
+    <jsp-config>  
+        这里设置编码会影响jsp页面用不了struts标签
+        <jsp-property-group>  
+            <url-pattern>*.jsp,*.html</url-pattern>  
+            <el-ignored>false</el-ignored>  
+            所有jsp页面编码格式
+            <page-encoding>UTF-8</page-encoding>
+        </jsp-property-group>  
+        
+                <jsp-property-group>  
+            <url-pattern>/back/*.jsp</url-pattern>  
+            <el-ignored>false</el-ignored>  
+            所有jsp页面编码格式
+            <page-encoding>UTF-8</page-encoding>
+            <include-prelude>：设置JSP 网页的抬头，扩展名为.jspf；
+            <include-prelude>/include/prelude.jspf</include-prelude>
+            <include-coda>：设置JSP 网页的结尾，扩展名为.jspf。
+            <include-coda>/back/default/common.footer.jspf</include-coda>
+        </jsp-property-group>  
+    </jsp-config> -->
+    <!--session失效时间单位：分钟-->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+    
+    <!-- 初始化参数 -->
+    <listener>
+        <listener-class>com.core.utils.StartInit</listener-class>
+    </listener>
+</web-app>

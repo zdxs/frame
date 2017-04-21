@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:c="http://www.springframework.org/schema/c" xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-4.0.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+    <!-- 配置 C3P0 数据源 -->
+    <bean name="dataSource" class="com.core.common.ApplicationContextResource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${datasource.driverClassName}" />
+        <property name="url" value="${datasource.url}" />
+        <property name="username" value="${datasource.username}"/>
+        <property name="password" value="${datasource.password}" />
+        <!--<property name="password" value="com.outEgg.mysql" />  -->
+        <property name="initialSize" value="${datasource.initialSize}" />
+        <property name="maxActive" value="${datasource.maxActive}" />
+        <!-- 最大空闲连接 -->
+        <property name="maxIdle" value="${datasource.maxIdle}" />
+        <!-- 最小空闲连接数 -->
+        <property name="minIdle" value="${datasource.minIdle}"></property>
+        <property name="maxWait" value="${datasource.maxWait}" />
+        <!-- SQL查询,用来验证从连接池取出的连接,在将连接返回给调用者之前 -->
+        <property name="validationQuery" value="select 1"></property>
+        <!-- 指定是否在在连接池中取出连接前进行检验,如果失败，则从连接池中移除连接尝试取出另一个 -->
+        <property name="testOnBorrow" value="true"></property>
+        <!-- 指定是否在归还连接前进行检验 -->
+        <property name="testOnReturn" value="false"></property>
+        <!--指明连接是否被空闲连接回收器(如果有)进行检验.如果检测失败,则连接将被从池中去除  -->
+        <property name="testWhileIdle" value="true"></property>
+        <!--在空闲连接回收器线程运行期间休眠的时间值,以毫秒为单位. 如果设置为非正数,则不运行空闲连接回收器线程   -->
+        <property name="timeBetweenEvictionRunsMillis" value="290000"></property>
+        <!-- 连接在池中保持空闲而不被空闲连接回收器线程(如果有)回收的最小时间值，单位毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="290000"></property>
+        <!-- 在每次空闲连接回收器线程(如果有)运行时检查的连接数量 -->
+        <property name="numTestsPerEvictionRun" value="3"></property>
+        <property name="removeAbandoned" value="true" />
+        <property name="removeAbandonedTimeout" value="600" />
+        <property name="logAbandoned" value="true" />
+        <property name="maxOpenPreparedStatements" value="300" />
+         
+        <!--
+            <property name="socketTimeout" value="0" /> socket操作（读写）超时，单位：毫秒。 0表示 
+            <property name="connectTimeout" value="0" /> 和数据库服务器建立socket连接时的超时 
+            <property name="autoReconnect" value="true"/> 当数据库连接异常中断时，是否自动重新连接 
+            <property name="autoReconnectForPools" value="true"/> 是否使用针对数据库连接池的重连策略 
+        -->
+    </bean>
+    <!-- 定义Hibernate的SessionFactory -->
+    <bean name="sessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <!--依赖注入数据源，注入正是上面定义的dataSource--> 
+        <property name="dataSource" ref="dataSource" />
+        <!--定义Hibernate的SessionFactory的属性--> 
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.use_outer_join">false</prop>
+                <!--在保存50000个或更多对象时，程序可能会抛出OutOfMemoryException异常，因为Hibernate在一级Cache缓存了新加入的所有对象。内存溢出。要解决这全问题就需要把JDBC批处理数量设置为一个合理的数值（一般是10～20）。在Hibernate的配置文件中可以加入以下属性-->
+                <prop key="hibernate.jdbc.batch_size">20</prop>
+                <prop key="hibernate.max_fetch_depth">1</prop>
+                <!--标明了  hibernate 使用  currentSession   意味着同一个线程下session对象是共享的--> 
+                <prop key="hibernate.current_session_context_class">thread</prop>
+                <prop key="hibernate.transaction.auto_close_session">true</prop>
+                <prop key="cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+                <!--                        默认Hibernate逆向生成对象时，*.hbm.xml文件里会指定catalog属性及值。这样，当数据库名称有变时，就得一个一个修改每一个*.hbm.xml文件，非常麻烦。
+                如何解决这一问题，非常简单，只需要在hibernate.cfg.xml里session-factory节点下添加如下代码配置，这样生成的*.hbm.xml文件就不会指定catalog属性及值了。
+                当数据库名称有变时，只需要改变一下这里的值。-->
+                <prop key="hibernate.default_catalog">buischool</prop>
+            </props>
+        </property>
+        <!--解决每次新增实体xml的时候添加一个-->
+        <!--        <property name="mappingLocations">
+            <value>classpath:/com/zhg/model/xml/*.hbm.xml</value>   
+        </property>-->
+        <property name="mappingResources">
+            <list>
+            </list>
+        </property>
+    </bean>
+    
+    <!--mybatis sqlSessionFactory session 工厂--> 
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <!--
+        自动扫描mapping.xml文件
+        mapperLocations 属性使用一个资源位置的 list。
+        这个属性可以用来指定 MyBatis 的 XML 映射器文件的位置。 
+        它的值可以包含 Ant 样式来加载一个目录中所有文件, 或者从基路径下 递归搜索所有路径 
+        -->
+        <property name="mapperLocations" value="classpath:com/**/mapping/*.xml"></property>
+        <!-- mybatis-config.xml留着还可以配置其他的东西 -->
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        
+    </bean>
+    <!--创建数据映射器，数据映射器必须为接口 mybatis-spring 自动扫描dao -->  
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.bufan.dao,;com.core.dao" />
+    </bean>
+    <!-- (事务管理) -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <!--配置通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true" />
+            <tx:method name="set*" read-only="true" />
+            <tx:method name="exist*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+            <tx:method name="load*" read-only="true" />
+            <tx:method name="query*" read-only="true" />
+            <tx:method name="list*" read-only="true" />
+            <tx:method name="paging*" read-only="true" />
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="del*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="remove*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="add*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="create*" propagation="REQUIRED" rollback-for="Exception" />
+        </tx:attributes>
+    </tx:advice>
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <!--切面，针对于复杂业务放到service层处理，这样可以进行回滚操作-->
+    <aop:config>
+        <aop:pointcut expression="execution(public * com.*.service.*.*(..))" id="bussinessService" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="bussinessService" />
+    </aop:config>
+    <!-- 创建一个sqlSession实例，线程安全的，可以在所有DAO实例共享，原理是将sqlSession，事务与当前线程挂钩 -->
+    <bean name="sqlSessionTemplate" id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <!--        constructor-arg：通过构造函数注入。 
+        property：通过setter对应的方法注入。-->
+        <constructor-arg index="0" ref="sqlSessionFactory" />
+    </bean>
+</beans>
+

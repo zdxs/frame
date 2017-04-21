@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+    <!-- 编码格式 -->
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+    <!-- 告诉struts由spring容器作为bean工厂 -->
+    <constant name="struts.objectFactory" value="spring"  />
+    <!-- 文件上传限制99m -->
+    <constant name="struts.multipart.maxSize" value="9999999999"/>
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+    <!--国际化语言-->
+    <constant name="struts.custom.i18n.resources" value="MessageResources"></constant>
+    <!-- 1.        使用<include>标签重用配置文件 -->
+    <include file="struts/struts_*.xml"/> 
+    
+    <!--当作后台默认拦截-->
+    <package name="dc-default" namespace="/" extends="struts-default">
+        <!-- 声明拦截器 -->
+        <interceptors>
+            <!-- 权限拦截器 -->
+            <!--<interceptor name="authority" class="com.bufan.common.interceptor.AuthorityInterceptor" />-->
+            <!-- 声明拦截器栈！解决struts安全漏洞，拦截所有的带有#号的url -->
+            <interceptor-stack name="MyStack">
+                <interceptor-ref name="exception"/> 
+                <!-- 使用自定义拦截器后就不会再使用默认拦截器栈，这里需要把默认拦截器栈加进来。 -->
+                <interceptor-ref name="defaultStack" />
+            </interceptor-stack>
+        </interceptors>
+ 
+        <!-- 默认拦截器 -->
+        <default-interceptor-ref name="MyStack"/>
+        <global-results>
+            <!-- 跳转到没有登录时的警告页面 -->
+            <result name="adminLogin" type="redirect">/sys/login</result>
+            <result name="noauthority">/view/admin/noauthority.jsp</result>
+            <result name="success">index.jsp</result>
+            <result name="errorMsg">/view/error.jsp</result>
+            <result name="error">/view/error.jsp</result>
+        </global-results>
+        <!--全局异常-->
+        <global-exception-mappings>
+            <!--这里的result="errorMsg"则表示去寻找result为errorMsg的回显视图-->
+            <exception-mapping result="errorMsg" exception="java.sql.SQLException"></exception-mapping>
+            <exception-mapping result="errorMsg" exception="cn.codeplus.exception.InvalidInputException"></exception-mapping>
+            <exception-mapping result="errorMsg" exception="javax.naming.NamingException"></exception-mapping>
+            <exception-mapping result="errorMsg" exception="java.lang.Exception"></exception-mapping>
+        </global-exception-mappings>
+    </package>
+</struts>    

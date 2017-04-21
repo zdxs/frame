@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+    <!-- 编码格式 -->
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+    <!-- 告诉struts由spring容器作为bean工厂 -->
+    <constant name="struts.objectFactory" value="spring"  />
+    <!-- 文件上传限制99m -->
+    <constant name="struts.multipart.maxSize" value="9999999999"/>
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+    <!--  
+                该属性指定需要Struts 2处理的请求后缀，该属性的默认值是action，即所有匹配*.action的请求都由Struts2处理。  
+                如果用户需要指定多个请求后缀，则多个后缀之间以英文逗号（,）隔开。  
+    --> 
+    <!-- <constant name="struts.action.extension" value="do，action" />   -->
+    <!-- result的用法见WebRoot/DOCstruts_result.doc,struts_context.doc -->
+    <!-- 1.        使用<include>标签重用配置文件 -->
+    <include file="struts_action.xml"/> 	
+    <include file="struts/struts_*.xml"/> 
+    
+    <package name="dc-default" namespace="/" extends="struts-default">
+        <!-- 声明拦截器 -->
+        <interceptors>
+            <!-- 权限拦截器 -->
+            <interceptor name="authority" class="com.bufan.common.interceptor.AuthorityInterceptor" />
+            <!-- 异常拦截器 -->
+            <!--            <interceptor name="exceptionInterceptor" class="com.zhg.common.interceptor.ExceptionInterceptor" />-->
+            
+            <!-- 声明拦截器栈！解决struts安全漏洞，拦截所有的带有#号的url -->
+            <interceptor-stack name="MyStack">
+                <interceptor-ref name="exception"/> 
+                <interceptor-ref name="authority" />
+                <!--<interceptor-ref name="exceptionInterceptor" />-->
+                <!-- 使用自定义拦截器后就不会再使用默认拦截器栈，这里需要把默认拦截器栈加进来。 -->
+                <interceptor-ref name="defaultStack" />
+                <interceptor-ref name="params">
+                    <param name="excludeParams">dojo\..*,^struts\..*,.*\\u0023.*,.*\\x5Cu0023.*,.*\\x5cu0023.*</param>
+                </interceptor-ref>
+            </interceptor-stack>
+        </interceptors>
+ 
+        <!-- 默认拦截器 -->
+        <default-interceptor-ref name="MyStack"/>
+        <global-results>
+            <!-- 跳转到没有登录时的警告页面 -->
+            <result name="success">index.jsp</result>
+            <result name="errorMsg">error.html</result>
+            <result name="error">error.html</result>
+        </global-results>
+        <!--全局异常-->
+        <global-exception-mappings>
+            <!--这里的result="errorMsg"则表示去寻找result为errorMsg的回显视图-->
+            <exception-mapping result="errorMsg" exception="java.lang.Exception"></exception-mapping>
+            <exception-mapping result="errorMsg" exception="java.sql.SQLException"></exception-mapping>
+            <exception-mapping result="errorMsg" exception="cn.codeplus.exception.InvalidInputException"></exception-mapping>
+            <exception-mapping result="errorMsg" exception="javax.naming.NamingException"></exception-mapping>
+        </global-exception-mappings>
+    </package>
+	
+    
+</struts>    
