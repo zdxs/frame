@@ -5,13 +5,14 @@
  */
 package com.bufan.ssmredis.bean;
 
+import com.bufan.ssmredis.common.BaseDao.AgentBean;
 import com.bufan.ssmredis.common.CoreBean;
 
 /**
  *
  * @author xiaosun
  */
-public class DemoTest implements CoreBean {
+public class DemoTest extends AgentBean implements CoreBean {
 
     private String id;              //id
     private String name;            //名称

@@ -18,6 +18,9 @@ public interface RedisDao<T> {
     //新增对象
     public boolean add(String key, T obj);
 
+    //新增对象
+    public boolean addObj(T obj);
+
     //新增一个list集合
     public boolean addRedisBeanList(String key);
 
@@ -60,7 +63,7 @@ public interface RedisDao<T> {
 
     //修改数据
     public boolean update(String key, T obj);
-    
+
     //通过key删除实体在list集合中的数据
     public boolean delListByKey(String key);
 

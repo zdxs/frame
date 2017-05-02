@@ -8,6 +8,9 @@ package com.bufan.ssmredis.common.BaseDao.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bufan.ssmredis.bean.DemoTest;
+import com.bufan.ssmredis.common.BaseDao.AgentBean;
+import com.bufan.ssmredis.common.BaseDao.BaseField;
+import com.bufan.ssmredis.common.BaseDao.Parm;
 import com.bufan.ssmredis.common.BaseDao.RedisDao;
 import com.bufan.ssmredis.util.Constants;
 import com.bufan.ssmredis.util.PageUtil;
@@ -36,7 +39,7 @@ import org.springframework.util.CollectionUtils;
  * @author xiaosun
  * @param <T>
  */
-public class RedisDaoImp<T> implements RedisDao<T> {
+public class RedisDaoImp<T extends AgentBean> implements RedisDao<T> {
 
     private Class<T> clazz;//类
     private StringRedisTemplate stringRedisTemplate;//redis操作模板  
@@ -51,6 +54,9 @@ public class RedisDaoImp<T> implements RedisDao<T> {
     private Lock lock = new ReentrantLock();//基于底层IO阻塞考虑  
     // 日志信息
     protected static Logger logger = Logger.getLogger(RedisDaoImp.class);
+
+    //该实体类的方法
+    private List<Parm> redisParm;
 
     public Class getClazz() {
         return clazz;
@@ -87,6 +93,9 @@ public class RedisDaoImp<T> implements RedisDao<T> {
         } else {
             ParameterizedType type = (ParameterizedType) genType;
             this.clazz = (Class) type.getActualTypeArguments()[0];
+
+            //赋值redisParm
+            this.redisParm = BaseField.getClassParm(this.clazz);
         }
         //Type是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。  
 //        Type types = this.getClass().getGenericSuperclass();
@@ -144,7 +153,7 @@ public class RedisDaoImp<T> implements RedisDao<T> {
     /**
      * 新增
      *
-     * @param key  键值
+     * @param key 键值--id
      * @param data 对象存储数据
      * @return
      */
@@ -172,8 +181,37 @@ public class RedisDaoImp<T> implements RedisDao<T> {
     }
 
     /**
-     * 新增一个list集合数据
-     * key=实体类+KEY_REDIS_SPLIT+KEY_REDIS_LIST 值=存储实体id
+     * 新增实体对象不需要传入主键
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public boolean addObj(T obj) {
+        boolean flog = false;
+        try {
+            //1创建主键id
+            String beanPk = this.incr(obj.getClass().getName().toLowerCase());
+            if (null != beanPk) {
+                //2获取主键key
+                String pkName = BaseField.getFieldValue(this.redisParm, Constants.KEY_BEAN_pkField).toString();
+                //3为对象设置值
+                flog = BaseField.setFileValue(obj, Constants.KEY_BEAN_SET + pkName, beanPk);
+                if (flog) {
+                    //5得到主键id
+                    String pkId = BaseField.getFieldValue(this.redisParm, pkName).toString();
+                    //6保存进入数据库
+                    flog = this.add(pkId, obj);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return flog;
+    }
+
+    /**
+     * 新增一个list集合数据 key=实体类+KEY_REDIS_SPLIT+KEY_REDIS_LIST 值=存储实体id
      * <p>
      * 该方法需要一个对应值 当实体删除的时候可以通过该值删除集合中的数据 以实现更新
      *
@@ -195,10 +233,10 @@ public class RedisDaoImp<T> implements RedisDao<T> {
                     Long addlist = listOps.rightPush(keys, key);
 
                     //存储集合位置-- 键值对形式 键的规则 类名称的小写+:+Constants.KEY_REDIS_LIST+:+key
+                    // TODO 执行此处的目的为了在删除的时候可以到其位置
                     String key_postion = keys + Constants.KEY_REDIS_SPLIT + key;
                     opsValue = getOpsValue();
                     opsValue.set(key_postion, addlist);
-
                     flog = true;
                 }
             }
@@ -211,7 +249,7 @@ public class RedisDaoImp<T> implements RedisDao<T> {
     /**
      * 查询长度
      *
-     * @param key  键
+     * @param key 键
      * @param type 类型 lsit,hash,set,zset
      * @return
      */
@@ -256,7 +294,7 @@ public class RedisDaoImp<T> implements RedisDao<T> {
      * 分页查询
      *
      * @param start 开始页
-     * @param end   结束页
+     * @param end 结束页
      * @return
      */
     @Override
@@ -368,7 +406,7 @@ public class RedisDaoImp<T> implements RedisDao<T> {
     /**
      * 根据键获取数据 object类型
      *
-     * @param key
+     * @param key 此方法传入的键已经拼凑完整
      * @return
      */
     @Override
@@ -439,10 +477,8 @@ public class RedisDaoImp<T> implements RedisDao<T> {
 
     //reidis自身命令
     /**
-     * Redis INCR命令用于将键的整数值递增1。如果键不存在，
-     * 则在执行操作之前将其设置为0。
-     * 如果键包含错误类型的值或包含无法表示为整数的字符串，
-     * 则会返回错误。此操作限于64位有符号整数。
+     * Redis INCR命令用于将键的整数值递增1。如果键不存在， 则在执行操作之前将其设置为0。
+     * 如果键包含错误类型的值或包含无法表示为整数的字符串， 则会返回错误。此操作限于64位有符号整数。
      *
      * @param key
      * @return
@@ -462,8 +498,7 @@ public class RedisDaoImp<T> implements RedisDao<T> {
     /**
      * 判断键是否存在
      * <p>
-     * 如果键存在，返回 true
-     * 如果键不存在，返回 false
+     * 如果键存在，返回 true 如果键不存在，返回 false
      *
      * @param key
      * @return true|false
@@ -518,7 +553,7 @@ public class RedisDaoImp<T> implements RedisDao<T> {
      * 默认每次自增kb
      *
      * @param key redis存储的key
-     * @param kb  自增数量
+     * @param kb 自增数量
      * @return
      */
     @Override
@@ -572,7 +607,7 @@ public class RedisDaoImp<T> implements RedisDao<T> {
                     flog = true;
                 }
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
         }
         return flog;
@@ -674,6 +709,14 @@ public class RedisDaoImp<T> implements RedisDao<T> {
 
     public void setHashOps(HashOperations<String, Object, Object> hashOps) {
         this.hashOps = hashOps;
+    }
+
+    public List<Parm> getRedisParm() {
+        return redisParm;
+    }
+
+    public void setRedisParm(List<Parm> redisParm) {
+        this.redisParm = redisParm;
     }
 
     public static void main(String[] args) {
