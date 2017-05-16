@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xsi:schemaLocation="http://www.springframework.org/schema/aop  
+         http://www.springframework.org/schema/aop/spring-aop-4.2.xsd   
+         http://www.springframework.org/schema/beans   
+         http://www.springframework.org/schema/beans/spring-beans-4.2.xsd  
+         http://www.springframework.org/schema/context  
+         http://www.springframework.org/schema/context/spring-context-4.2.xsd  
+         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.2.xsd  
+         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"  
+    xmlns:jee="http://www.springframework.org/schema/jee" xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:p="http://www.springframework.org/schema/p">  
+    
+    <!-- 属性文件读入 -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <!-- 基本配置信息 -->
+                <value>classpath:properties/db.properties</value>
+            </list>
+        </property>
+    </bean>
+	
+    <!-- 引入其它文件 -->
+    <!-- 如果这里引入了xml则webxml中spring监听则必须去除 -->
+    <!-- 数据库连接 -->
+    <import resource="applicationContext-resource.xml" />	
+    <!-- dao -->
+    <import resource="applicationContext-dao.xml"/>	
+    <!-- service -->
+    <import resource="applicationContext-service.xml"/>	
+    <!-- action -->
+    <import resource="applicationContext-action.xml"/>	
+    <!-- applicationContext-eacache -->
+    <!--<import resource="applicationContext-eacache.xml"/>-->	
+</beans>
+

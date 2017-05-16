@@ -9,7 +9,7 @@ import com.bufan.ssmredis.common.BaseDao.AgentBean;
 import com.bufan.ssmredis.common.CoreBean;
 
 /**
- *
+ * 测试类
  * @author xiaosun
  */
 public class DemoTest extends AgentBean implements CoreBean {

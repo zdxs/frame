@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+    "http://struts.apache.org/dtds/struts-2.5.dtd"> 
+<struts>  
+    <!-- 包含struts-default.xml文件 -->
+    <include file="struts-default.xml"></include>
+    <!-- 请求参数的编码方式 -->  
+    <constant name="struts.i18n.encoding" value="UTF-8" />  
+    <!-- 指定被struts2处理的请求后缀类型。多个用逗号隔开 -->  
+    <constant name="struts.action.extension" value="action,do" />  
+    <!-- 告诉struts由spring容器作为bean工厂 -->
+    <constant name="struts.objectFactory" value="spring" />
+    <!-- 当struts.xml改动后，是否重新加载。默认值为false(生产环境下使用),开发阶段最好打开 -->  
+    <constant name="struts.configuration.xml.reload" value="true" />  
+    <!-- 是否使用struts的开发模式。开发模式会有更多的调试信息。默认值为false(生产环境下使用),开发阶段最好打开 -->  
+    <constant name="struts.devMode" value="false" />  
+    <!-- 设置浏览器是否缓存静态内容。默认值为true(生产环境下使用),开发阶段最好关闭 -->  
+    <constant name="struts.serve.static.browserCache" value="false" />  
+    <!-- 是否开启动态方法调用 -->  
+    <constant name="struts.enable.DynamicMethodInvocation" value="true" />  
+    <!-- Action名称中是否还是用斜线 -->
+    <constant name="struts.enable.SlashesInActionNames" value="true" />
+    <!-- 允许标签中使用表达式语法 -->
+    <constant name="struts.tag.altSyntax" value="true" />
+    <!-- 每次HTTP请求系统都重新加载资源文件，有助于开发 -->
+    <constant name="struts.i18n.reload" value="true" />
+    <!-- 文件上传限制99m -->
+    <constant name="struts.multipart.maxSize" value="9999999999"/>
+    <!--导入其他xml配置-->
+    <package name="dc-demotest" namespace="/" extends="struts-default">
+        <action name="demotest" class="demoTestAction"  method="demotest">
+            <result name="success">/success.html</result>
+            <result name="error">/success.html</result>
+        </action>
+    </package> 
+    <include file="struts2/struts_*.xml"/> 
+</struts>  

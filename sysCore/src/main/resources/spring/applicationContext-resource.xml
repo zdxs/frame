@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xsi:schemaLocation="http://www.springframework.org/schema/aop  
+         http://www.springframework.org/schema/aop/spring-aop-4.2.xsd   
+         http://www.springframework.org/schema/beans   
+         http://www.springframework.org/schema/beans/spring-beans-4.2.xsd  
+         http://www.springframework.org/schema/context  
+         http://www.springframework.org/schema/context/spring-context-4.2.xsd  
+         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.2.xsd  
+         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"  
+    xmlns:jee="http://www.springframework.org/schema/jee" xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:p="http://www.springframework.org/schema/p">  
+    <!-- 配置 C3P0 数据源 -->
+    <bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="jdbcUrl" value="${db.url}"></property>   
+        <property name="driverClass" value="${db.driverClassName}"></property>  
+        <property name="user" value="${db.username}"></property>  
+        <property name="password" value="${db.password}"></property>  
+        <property name="maxPoolSize" value="40"></property>   
+        <property name="minPoolSize" value="1"></property>   
+        <property name="initialPoolSize" value="1"></property>   
+        <property name="maxIdleTime" value="20"></property>  
+    </bean>
+    <!-- 定义Hibernate的SessionFactory -->
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!--依赖注入数据源，注入正是上面定义的dataSource--> 
+        <property name="dataSource" ref="dataSource" />
+        <!--定义Hibernate的SessionFactory的属性--> 
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <!-- 显示sql语句 -->   
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.use_outer_join">false</prop>
+                <!--在保存50000个或更多对象时，程序可能会抛出OutOfMemoryException异常，因为Hibernate在一级Cache缓存了新加入的所有对象。内存溢出。要解决这全问题就需要把JDBC批处理数量设置为一个合理的数值（一般是10～20）。在Hibernate的配置文件中可以加入以下属性-->
+                <prop key="hibernate.jdbc.batch_size">20</prop>
+                <prop key="hibernate.max_fetch_depth">1</prop>
+                <!--标明了  hibernate 使用  currentSession   意味着同一个线程下session对象是共享的--> 
+                <prop key="hibernate.current_session_context_class">thread</prop>
+                <prop key="hibernate.transaction.auto_close_session">true</prop>
+                <prop key="cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+                <!--默认Hibernate逆向生成对象时，*.hbm.xml文件里会指定catalog属性及值。这样，当数据库名称有变时，就得一个一个修改每一个*.hbm.xml文件，非常麻烦。
+                如何解决这一问题，非常简单，只需要在hibernate.cfg.xml里session-factory节点下添加如下代码配置，这样生成的*.hbm.xml文件就不会指定catalog属性及值了。
+                当数据库名称有变时，只需要改变一下这里的值。-->
+                <prop key="hibernate.default_catalog">${db.table}</prop>
+                <!-- 用于解决懒加载时找不到session的问题 -->    
+                <!-- 关闭Load方法的延迟加载 -->   
+                <prop key="hibernate.enable_lazy_load_no_trans">true</prop>  
+            </props>
+        </property>
+        <!--解决每次新增实体xml的时候添加一个-->
+        <property name="mappingLocations">
+            <value>classpath:/com/core/bufan/syscore/bean/xml/*.hbm.xml</value>   
+        </property>
+<!--        <property name="mappingResources">
+            <list>
+            </list>
+        </property>-->
+    </bean>
+    
+    <!-- 配置事务管理器 -->  
+    <bean id="hibTransactionManager"  
+          class="org.springframework.orm.hibernate5.HibernateTransactionManager">  
+        <property name="sessionFactory" ref="sessionFactory"></property>  
+    </bean>  
+    <!--支持注解-->
+    <!--<tx:annotation-driven transaction-manager="hibTransactionManager" />-->
+    <!-- 配置事务通知属性 -->  
+    <tx:advice id="txAdvice" transaction-manager="hibTransactionManager">  
+        <!-- 定义事务传播属性 -->  
+        <tx:attributes>  
+            <tx:method name="insert*" propagation="REQUIRED" />  
+            <tx:method name="update*" propagation="REQUIRED" />  
+            <tx:method name="edit*" propagation="REQUIRED" />  
+            <tx:method name="save*" propagation="REQUIRED" />  
+            <tx:method name="add*" propagation="REQUIRED" />  
+            <tx:method name="new*" propagation="REQUIRED" />  
+            <tx:method name="set*" propagation="REQUIRED" />  
+            <tx:method name="remove*" propagation="REQUIRED" />  
+            <tx:method name="delete*" propagation="REQUIRED" />  
+            <tx:method name="change*" propagation="REQUIRED" />  
+            <tx:method name="get*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="find*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="query*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="load*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="*" propagation="REQUIRED" read-only="true" />  
+        </tx:attributes>  
+    </tx:advice>  
+    <!-- 配置事务切点, 并把切点和事务属性关联起来 -->  
+    <aop:config>  
+        <aop:pointcut expression="execution(* com.core.bufan.syscore.services.*.*(..))"  
+            id="txPointcut" />  
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />  
+    </aop:config>  
+    <!-- 简化dao对数据的处理 -->
+    <bean id="hibernateTemplate" name="hibernateTemplate"
+            class="org.springframework.orm.hibernate5.HibernateTemplate">
+            <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+    
+    <!--mybatis sqlSessionFactory session 工厂--> 
+<!--    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        
+        自动扫描mapping.xml文件
+        mapperLocations 属性使用一个资源位置的 list。
+        这个属性可以用来指定 MyBatis 的 XML 映射器文件的位置。 
+        它的值可以包含 Ant 样式来加载一个目录中所有文件, 或者从基路径下 递归搜索所有路径 
+        
+        <property name="mapperLocations" value="classpath:com/**/mapping/*.xml"></property>
+         mybatis-config.xml留着还可以配置其他的东西 
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        
+    </bean>
+    创建数据映射器，数据映射器必须为接口 mybatis-spring 自动扫描dao   
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.bufan.dao,;com.core.dao" />
+    </bean>
+     (事务管理) 
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    配置通知
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true" />
+            <tx:method name="set*" read-only="true" />
+            <tx:method name="exist*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+            <tx:method name="load*" read-only="true" />
+            <tx:method name="query*" read-only="true" />
+            <tx:method name="list*" read-only="true" />
+            <tx:method name="paging*" read-only="true" />
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="del*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="remove*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="add*" propagation="REQUIRED" rollback-for="Exception" />
+            <tx:method name="create*" propagation="REQUIRED" rollback-for="Exception" />
+        </tx:attributes>
+    </tx:advice>
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    切面，针对于复杂业务放到service层处理，这样可以进行回滚操作
+    <aop:config>
+        <aop:pointcut expression="execution(public * com.*.service.*.*(..))" id="bussinessService" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="bussinessService" />
+    </aop:config>
+     创建一个sqlSession实例，线程安全的，可以在所有DAO实例共享，原理是将sqlSession，事务与当前线程挂钩 
+    <bean name="sqlSessionTemplate" id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+                constructor-arg：通过构造函数注入。 
+        property：通过setter对应的方法注入。
+        <constructor-arg index="0" ref="sqlSessionFactory" />
+    </bean>-->
+</beans>
+

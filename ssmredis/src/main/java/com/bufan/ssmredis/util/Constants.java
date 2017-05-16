@@ -8,7 +8,7 @@ package com.bufan.ssmredis.util;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
- * java类文件中所用到的公共信息
+ * java类文件中所用到的公共信息 只针对于数据底层
  *
  * @author xiaosun
  */

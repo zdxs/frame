@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- 该xml将配置所有的属性-->
+<!--     
+   <hibernate-mapping>一般不去配置，采用默认即可。    
+   default-cascade="none"：默认的级联风格，表与表联动。    
+   default-lazy="true"：默认延迟加载    
+-->    
+<hibernate-mapping>
+    <!--     
+       <class>：使用class元素定义一个持久化类。    
+       name="cn.javass.user.vo.UserModel"：持久化类的java全限定名；    
+       table="tbl_user"：对应数据库表名；    
+       mutable="true"：默认为true，设置为false时则不可以被应用程序更新或删除；    
+       dynamic-insert="false"：默认为false，动态修改那些有改变过的字段，而不用修改所有字段；    
+       dynamic-update="false"：默认为false，动态插入非空值字段；    
+       select-before-update="false"：默认为false，在修改之前先做一次查询，与用户的值进行对比，有变化都会真正更新；    
+       optimistic-lock="version"：默认为version(检查version/timestamp字段)，取值：all(检查全部字段)、dirty(只检查修改过的字段)、    
+                                  none(不使用乐观锁定)，此参数主要用来处理并发，每条值都有固定且唯一的版本，版本为最新时才能执行操作；    
+       catalog:数据库
+    --> 
+    <class name="com.core.bufan.syscore.bean.DemoTest" table="demo_demotest" optimistic-lock="version">
+        <!--     
+           <id>：定义了该属性到数据库表主键字段的映射。    
+           name="userId"：标识属性的名字；    
+           column="userId"：表主键字段的名字，如果不填写与name一样；    
+        -->    
+        <id name="id" type="integer" >
+            <column name="id" />
+            <!-- <generator>：指定主键由什么生成，推荐使用uuid（随机生成唯一通用的表示符，实体类的ID必须是String），  
+            native（让数据库自动选择用什么生成（根据底层数据库的能力选择identity，sequence或hilo中的一种）），  
+            assigned（指用户手工填入，默认）。
+            generator节点的属性:
+                 (1).class: 指定主键生成器
+                 (2).name: 指定当前映射对应的持久类的主键名
+                 (3).column: 指定当前映射对应的数据库表中的主键名(默认值为对应持久类中的主键名)
+                 (4).type: 指定当前映射对应的数据库中主键的数据类型
+                 (5).unique: 设置该字段的值是否唯一(默认值为false)
+                 (6).not-null: 设置该字段的值是否可以为null(默认值为false)
+                 (7).update: 设置update操作时是否包含本字段的数据(默认值为true)
+                 (8).insert: 设置insert操作时是否包含本字段的数据(默认值为true)
+                 (9).formula: 设置查询操作时该属性的值用指定的SQL来计算
+                 (10).access: Hibernate访问这个属性的策略(默认值为property)
+                 (11).lazy: 设置该字段是否采用延迟加载策略(默认值为false)
+                 (12).optimistic-lock: 指定此属性做更新操作时是否需要乐观锁定(默认值为true)
+            -->    
+            <generator class="native" />
+        </id>
+        <!--     
+           <version/>：使用版本控制来处理并发，要开启optimistic-lock="version"和dynamic-update="true"。    
+           name="version"：持久化类的属性名，column="version"：指定持有版本号的字段名；    
+        -->    
+        <version name="version" column="version"/>    
+        
+        <!--<property>
+            实体类属性
+            普通字段 除主键外,java基本数据类型的属性,比如Integer(int),String,Date等,
+            注意Integer默认为null,int默认为0.
+            xml中使用<property />标签配置普通属性.type指定列类型,日期属性配置,与普通属性配置相同,
+            只是type中指定的是日期类型即可,取值可以有date,time,timestamp(简写方式)
+            </property>
+            property节点的属性: 
+                用于持久化类的属性与数据库表字段之间的映射,包含如下属性：
+                 (1)name：持久化类的属性名，以小写字母开头
+                 (2)column：数据库表的字段名
+                 (3)type：Hibernate映射类型的名字
+                (4).formula: 设置当前节点对应的持久类中的属性的值由指定的SQL从数据库获取
+                    注:指定的SQL必须用()括起来,指定SQL中使用列时必须用表的别名加.加列名的方式访问,
+                    但如果指定SQL中要使用当前映射对应的列时不能用表的别名加.加列名的方式访问,而是直接访问即可
+                    如:formula="(select tn.columnName from tableName tn where tn.columnName=当前映射中的属性名)"
+                (5).unique: 设置该字段的值是否唯一(默认值为false)
+                (6).not-null: 设置该字段的值是否可以为null(默认值为false)
+                (7).not-found: 设置当当前节点对应的数据库字段为外键时引用的数据不存在时如何让处理(默认值为exception:产生异常,可选值为ignore:对不存在的应用关联到null)
+                (8).property-ref: 设置关联类的属性名，此属性和本类的关联相对应 默认值为关联类的主键
+                (9).entity-name: 被关联类的实体名
+                (10).lazy: 指定是否采用延迟加载及加载策略(默认值为proxy:通过代理进行关联,可选值为true:此对象采用延迟加载并在变量第一次被访问时抓取、false:此关联对象不采用延迟加载)
+                (11).access: Hibernate访问这个属性的策略(默认值为property)
+                (12).optimistic-lock: 指定此属性做更新操作时是否需要乐观锁定(默认值为true)
+        -->
+        <property name="name" type="string">
+            <column name="name"></column>
+        </property>
+        
+        <!--        one-to-one节点的属性:
+        (1).name: 映射类属性的名字
+        (2).class: 关联类的名字
+        (3).formula: 绝大多数一对一关联都指向其实体的主键。在某些情况下会指向一个或多个字段或是一个表达式，此时可用一个SQL公式来表示
+        (4).cascade: 设置级联操作时的级联类型
+        (5).constrained: 表明当前类对应的表与被关联的表之间是否存在着外键约束 默认值为false
+        (6).fetch: 设置抓取数据的策略 可选值为 join外连接抓取、select序列选择抓取
+        (7).property-ref: 设置关联类的属性名，此属性和本类的主键相对应 默认值为关联类的主键
+        (8).access: Hibernate访问这个属性的策略(默认值为property)
+        (9).lazy: 指定是否采用延迟加载及加载策略 默认值为proxy通过代理进行关联 可选值为 true此对象采用延迟加载并在变量第一次被访问时抓取、false此关联对象不采用延迟加载
+        (10).entity-name: 被关联类的实体名-->
+        
+        <!--        many-to-one 元素:
+        (1).name: 映射类属性的名字
+        (2).class: 关联类的名字
+        (3).formula: 绝大多数一对一关联都指向其实体的主键。在某些情况下会指向一个或多个字段或是一个表达式，此时可用一个SQL公式来表示
+        (4).column: 中间关联表映射到目标关联表的关联字段
+        (5).cascade: 设置级联操作时的级联类型
+        (6).fetch: 设置抓取数据的策略 默认值为select序列选择抓取 可选值为join外连接抓取
+        (7).lazy: 指定是否采用延迟加载及加载策略 默认值为proxy通过代理进行关联 可选值为 true此对象采用延迟加载并在变量第一次被访问时抓取、false此关联对象不采用延迟加载
+        (8).update: 进行update操作时是否包含此字段
+        (9).insert: 进行insert操作时是否包含此字段
+        (10).not-found: 指定外键引用的数据不存在时如何让处理 默认值为exception产生异常 可选值为ignore对不存在的应用关联到null-->
+        
+        <!--        many-to-many 元素
+            10.set 元素
+           (1).name: 映射类属性的名字
+           (2).table: 关联的目标数据库表
+           (3).schema: 目标数据库表的schema名字
+           (4).catalog: 目标数据库表的catalog名字
+           (5).subselect: 定义一个子查询
+           (6).sort: 设置排序的类型 默认值为 unsorted不排序 可选值为 natural自然排序、comparatorClass实现接口类作为排序算法 避免与order-by同时使用
+           (7).lazy: 是否采用延迟加载
+           (8).inverse: 用于标识双向关联中被动的一方 默认值为false
+           (9).cascade: 设置级联操作时的级联类型
+           (10).mutable: 标识被关联对象是否可以改变 默认值为true
+           (11).order-by: 设置排序规则
+           (12).where: 增加筛选条件
+           (13).batch-size: 延迟加载时，一次读取数据的数量 默认值为1
+           (14).fetch: 设置抓取数据的策略 可选值为 join外连接抓取、select序列选择抓取
+        11.list 元素
+        12.map 元素-->
+    </class>
+</hibernate-mapping>
