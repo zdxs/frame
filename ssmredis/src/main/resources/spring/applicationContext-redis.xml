@@ -51,8 +51,7 @@
       
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">  
         <property name="connectionFactory"   ref="connectionFactory" />  
-        <!--     如果不配置Serializer，那么存储的时候只能使用String，如果用对象类型存储，
-        那么会提示错误 can't cast to String！！！-->  
+        <!--     如果不配置Serializer，那么存储的时候只能使用String，如果用对象类型存储，那么会提示错误 can't cast to String！！！-->  
         <property name="keySerializer">
             <bean
                 class="org.springframework.data.redis.serializer.StringRedisSerializer" />
@@ -64,8 +63,7 @@
     </bean>   
     <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">  
         <property name="connectionFactory"   ref="connectionFactory" />  
-        <!--     如果不配置Serializer，那么存储的时候只能使用String，如果用对象类型存储，
-        那么会提示错误 can't cast to String！！！-->  
+        <!--     如果不配置Serializer，那么存储的时候只能使用String，如果用对象类型存储，那么会提示错误 can't cast to String！！！-->  
         <property name="keySerializer">
             <bean
                 class="org.springframework.data.redis.serializer.StringRedisSerializer" />

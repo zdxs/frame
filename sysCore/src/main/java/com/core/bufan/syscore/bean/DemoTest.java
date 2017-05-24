@@ -5,29 +5,16 @@
  */
 package com.core.bufan.syscore.bean;
 
+import java.io.Serializable;
+
 /**
  *
  * @author xiaosun
  */
-public class DemoTest {
+public class DemoTest implements Serializable {
 
     protected Integer id;
     private String name;
-    private String version;
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public DemoTest(Integer id, String name, String version) {
-        this.id = id;
-        this.name = name;
-        this.version = version;
-    }
 
     public DemoTest() {
         super();
@@ -35,7 +22,7 @@ public class DemoTest {
 
     @Override
     public String toString() {
-        return "DemoTest{" + "id=" + id + ", name=" + name + ", version=" + version + '}';
+        return "DemoTest{" + "id=" + id + ", name=" + name + '}';
     }
 
     public Integer getId() {

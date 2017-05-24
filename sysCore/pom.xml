@@ -19,7 +19,7 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <spring.version>4.2.6.RELEASE</spring.version>  
         <hibernate.version>5.1.0.Final</hibernate.version>  
-        <struts.version>2.5</struts.version>  
+        <struts.version>2.5.5</struts.version>  
         <junit.version>4.8.1</junit.version>
         <fastjson.version>1.2.31</fastjson.version>
     </properties>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-    <!DOCTYPE struts PUBLIC
-    "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
-    "http://struts.apache.org/dtds/struts-2.5.dtd"> 
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
 <struts>  
     <!-- 包含struts-default.xml文件 -->
     <include file="struts-default.xml"></include>
@@ -27,12 +27,14 @@
     <constant name="struts.i18n.reload" value="true" />
     <!-- 文件上传限制99m -->
     <constant name="struts.multipart.maxSize" value="9999999999"/>
+    <!--默认-->
+    <package name="dc_default" extends="struts-default" namespace="/">
+        <!-- 关键地方  struts2.5 为了提升安全性，添加了 allomethod 这么个玩意-->
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+    </package>
+    <package name="dc-demotests" extends="dc_default" namespace="/demotests">
+        <action name="*" class="demoTestAction" method="{1}"></action>
+    </package>
     <!--导入其他xml配置-->
-    <package name="dc-demotest" namespace="/" extends="struts-default">
-        <action name="demotest" class="demoTestAction"  method="demotest">
-            <result name="success">/success.html</result>
-            <result name="error">/success.html</result>
-        </action>
-    </package> 
     <include file="struts2/struts_*.xml"/> 
 </struts>  

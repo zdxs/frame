@@ -15,7 +15,7 @@
     <!-- action -->
     <!-- 注意: 在 IOC 容器中配置 Struts2 的 Action 时, 需要配置 scope 属性, 其值必须为 prototype -->
     <bean id="demoTestAction" class="com.core.bufan.syscore.action.DemoTestAction" scope="prototype">
-        <!--<property name="codeService" ref="codeService"></property>-->
+        <property name="demoTestService" ref="demoTestService"></property>
     </bean> 
 </beans>
 

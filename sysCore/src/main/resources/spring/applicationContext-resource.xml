@@ -39,8 +39,14 @@
                 <prop key="hibernate.jdbc.batch_size">20</prop>
                 <prop key="hibernate.max_fetch_depth">1</prop>
                 <!--标明了  hibernate 使用  currentSession   意味着同一个线程下session对象是共享的--> 
-                <prop key="hibernate.current_session_context_class">thread</prop>
+<!--            第一种：hibernate3.x及以上的版本可以直接注释掉这条代码，或者删除也行 
+                第二种：标签值thread改成 : org.springframework.orm.hibernate5.SpringSessionContext-->
+                <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>  
+                <!--自动关闭session-->
                 <prop key="hibernate.transaction.auto_close_session">true</prop>
+                <!--自动提交-->
+                <prop key="connection.autocommit">true</prop>
                 <prop key="cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
                 <!--默认Hibernate逆向生成对象时，*.hbm.xml文件里会指定catalog属性及值。这样，当数据库名称有变时，就得一个一个修改每一个*.hbm.xml文件，非常麻烦。
                 如何解决这一问题，非常简单，只需要在hibernate.cfg.xml里session-factory节点下添加如下代码配置，这样生成的*.hbm.xml文件就不会指定catalog属性及值了。
@@ -57,6 +63,7 @@
         </property>
 <!--        <property name="mappingResources">
             <list>
+            <value>com/dc/beans/Address.hbm.xml</value>
             </list>
         </property>-->
     </bean>
@@ -66,6 +73,13 @@
           class="org.springframework.orm.hibernate5.HibernateTransactionManager">  
         <property name="sessionFactory" ref="sessionFactory"></property>  
     </bean>  
+    <!--这是一个关于延迟加载的问题 hibernate5没有这个类-->
+<!--    <bean id="hibernateInterceptor"
+        class="org.springframework.orm.hibernate5.HibernateInterceptor">
+        <property name="sessionFactory">
+        <ref bean="sessionFactory" />
+        </property>
+    </bean>-->
     <!--支持注解-->
     <!--<tx:annotation-driven transaction-manager="hibTransactionManager" />-->
     <!-- 配置事务通知属性 -->  
@@ -73,6 +87,7 @@
         <!-- 定义事务传播属性 -->  
         <tx:attributes>  
             <tx:method name="insert*" propagation="REQUIRED" />  
+            <tx:method name="add*" propagation="REQUIRED" />  
             <tx:method name="update*" propagation="REQUIRED" />  
             <tx:method name="edit*" propagation="REQUIRED" />  
             <tx:method name="save*" propagation="REQUIRED" />  
@@ -91,16 +106,17 @@
     </tx:advice>  
     <!-- 配置事务切点, 并把切点和事务属性关联起来 -->  
     <aop:config>  
+        <!--定义在service包和所有子包里的任意类的任意方法的执行：-->
         <aop:pointcut expression="execution(* com.core.bufan.syscore.services.*.*(..))"  
             id="txPointcut" />  
         <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />  
     </aop:config>  
+    
     <!-- 简化dao对数据的处理 -->
     <bean id="hibernateTemplate" name="hibernateTemplate"
             class="org.springframework.orm.hibernate5.HibernateTemplate">
             <property name="sessionFactory" ref="sessionFactory"></property>
     </bean>
-    
     <!--mybatis sqlSessionFactory session 工厂--> 
 <!--    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"></property>

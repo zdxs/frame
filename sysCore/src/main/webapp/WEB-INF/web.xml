@@ -15,15 +15,18 @@
         </listener-class>  
     </listener>  
     
+    <!-- 事务处理拦截器 **必须配置在struts的前面 不添加报Could not obtain transaction-synchronized Session for current thread错误**-->
     <filter>
         <filter-name>SpringOpenSessionInViewFilter</filter-name>
         <filter-class>org.springframework.orm.hibernate5.support.OpenSessionInViewFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>SpringOpenSessionInViewFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <!--        <url-pattern>/*</url-pattern>-->
+        <url-pattern>*.do,*.action</url-pattern>  
     </filter-mapping>
     
+<!--    如果使用这个filter会出现session close
     <filter>  
         <filter-name>openSessionInViewFilter</filter-name>  
         <filter-class>  
@@ -38,12 +41,12 @@
     <filter-mapping>  
         <filter-name>openSessionInViewFilter</filter-name>  
         <url-pattern>*.do,*.action</url-pattern>  
-    </filter-mapping>  
+    </filter-mapping>  -->
       
     <filter>
         <filter-name>struts-prepare</filter-name>
         <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareFilter</filter-class>
-<!--        <init-param>
+        <!--        <init-param>
             <param-name>filterConfig</param-name>
             <param-value>classpath:struts.xml</param-value>
         </init-param>-->
